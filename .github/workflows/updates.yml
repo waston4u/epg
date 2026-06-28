@@ -1,0 +1,24 @@
+name: Daily EPG Update
+on:
+  schedule:
+    - cron: '0 0 * * *' # Runs automatically every night at midnight UTC
+  workflow_dispatch: # Allows you to manually trigger it anytime to test
+
+jobs:
+  update-epg:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Download Open-EPG File
+        run: |
+          curl -L "https://www.open-epg.com/generate/GduaEzS2Ep.xml.gz" -o epg.xml.gz
+
+      - name: Commit and Push Changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add epg.xml.gz
+          git commit -m "Automated EPG Update" || exit 0
+          git push
